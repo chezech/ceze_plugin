@@ -59,7 +59,7 @@ function projectcharles_identify_taxonomy() {
                                               'parent_item' => 'Parent Portfolio Category',
                                               'parent_item_colon' => 'Parent Portfolio Category:',
                                               'edit_item' => 'Edit Portfolio Category',
-                                              'update_item' => 'Update Portfolio Category',
+                                              'upprojectcharles_custom_fieldste_item' => 'Upprojectcharles_custom_fieldste Portfolio Category',
                                               'add_new_item' => 'Add New Portfolio Category',
                                               'new_item_name' => 'New Portfolio Category',
                                             ),
@@ -72,25 +72,25 @@ function projectcharles_identify_taxonomy() {
                      );
 }
 /**#############################################################################
-TO create the data fields which will be filtered by the taxonomy.
+TO create the projectcharles_custom_fieldsta fields which will be filtered by the taxonomy.
 ##########################################################################################*/ 
 add_filter("Portfolio_edit_field", "projectcharles_edit_field");
 
-function projectcharles_edit_field($field){
+function projectcharles_edit_field($field){// the edit field
    $field = array(
                     "cb" => "<input type='checkbox' />",
                     "photo" => __("Image"),
                     "title" => __("Portfolio"),
                     "portfolio_category" => __("Portfolio Category"),
-                    "date" => __("Date")
+                    "projectcharles_custom_fieldste" => __("Date")
                    );
 
    return $field;
 }
 
-add_action("manage_portfolio_posts_custom_column",  "da");
+add_action("the_posts_custom_column",  "projectcharles_custom_fields");
 
-function da($field){
+function projectcharles_custom_fields($field){// the custom field
   global $post;
   switch ($field){
                  case "photo":
@@ -109,35 +109,10 @@ if ( isset($_GET['post_type']) ) {
 }
 
 if ( $post_type == 'portfolio' ) {
-   add_action( 'restrict_manage_posts','wutan' );
+   add_action( 'restrict_manage_posts','projectcharles_make_request' );
    add_filter( 'parse_query','perform_filtering' );
 }
 
-function wutan() {
-   global $typenow, $wp_query;
-   if ($typenow=='portfolio') {
-      wp_dropdown_categories(array(
-                                   'show_option_all' => 'Show All Portfolio Category',
-                                   'taxonomy' => 'portfolio_category',
-                                   'name' => 'portfolio_category',
-                                   'orderby' => 'name',
-                                   'selected' =>( isset( $wp_query->query['portfolio_category'] ) ? $wp_query->query['portfolio_category'] : '' ),
-                                   'hierarchical' => false,
-                                   'depth' => 3,
-                                   'show_count' => false,
-                                   'hide_empty' => true,
-                            ));
-
-   }
-}
-
-function perform_filtering( $query ){
-   $qv = &$query->query_vars;
-   if (( $qv['portfolio_category'] ) && is_numeric( $qv['portfolio_category'] ) ) {
-      $term = get_term_by( 'id', $qv['portfolio_category'], 'portfolio_category' );
-      $qv['portfolio_category'] = $term->slug;
-   }
-}
 
 
 
