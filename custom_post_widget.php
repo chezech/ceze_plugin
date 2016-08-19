@@ -112,4 +112,82 @@ $category = $inst[ 'category' ];
 else {
 $category = __( 'Category', 'projectcharles_widget_setup' );
 }
+/*#######################################################################################
+The admin form of the widget is created
+##########################################################################################*/ 
+?>
+<p>
+<!----------------------------Widget Fields: Title---------------------------------------->
+<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
+<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+</P>
+<P>
+<!----------------------------Widget Fields: Category---------------------------------------->
+<label for="<?php echo $this->get_field_id( 'category' ); ?>"><?php _e( 'Category:' ); ?></label> 
+<input class="widefat" id="<?php echo $this->get_field_id( 'category' ); ?>" name="<?php echo $this->get_field_name( 'category' ); ?>" type="text" value="<?php echo esc_attr( $category ); ?>" />
+</P>
+<?php 
+}
+	
+// Updating widget replacing old instances with new
+public function update( $new_instance, $old_instance ) {
+$inst = array();
+$inst['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+$inst['category'] = ( ! empty( $new_instance['category'] ) ) ? strip_tags( $new_instance['category'] ) : '';
+return $inst;
+}
+} // Class Projectcharles_widget ends here
+
+// Register and load the widget
+function Projectcharles_load_widget() {
+	register_widget( 'Projectcharles_widget' );
+}
+add_action( 'widgets_init', 'Projectcharles_load_widget' );
+
+
+/*##################################################################################################
+The shortcode is created here with the aim of giving users the option to select a specific category, 
+the set order, and post per page for dispalying the portfolio custom post type. The users can use 
+the following shortcode anywhere in the post or page: 
+[custom_post_category name="" how_many_posts=  show_what_order=""]. Remember, post per page is set to 5, 
+set order is ASC, and orderedby name are fixed in the backend for non shortcode options. 
+##########################################################################################*/
+function Projectcharles_postsbycategory($atts) {
+   extract(shortcode_atts(array(
+      'name' => "",
+	  'how_many_posts'=>"",
+	  'show_what_order'=>""
+   ), $atts));
+
+// the query
+$the_query = new WP_Query( array( 'category_name' =>$name, 'posts_per_page' =>$how_many_posts, 'order'=>$show_what_order)); 
+
+// The Loop
+if ( $the_query->have_posts() ) {
+	$result .= '<ul>';
+	while ( $the_query->have_posts() ) {
+		$the_query->the_post();
+			if ( has_post_thumbnail() ) {
+			$result .= '<li>';
+			$result .= '<a href="' . get_the_permalink() .'" rel="bookmark">' . get_the_post_thumbnail($post_id, array( 50, 50) ) . get_the_title() .'</a></li>';
+			} else { 
+			// if no featured image is found
+			$result .= '<li><a href="' . get_the_permalink() .'" rel="bookmark">' . get_the_title() .'</a></li>';
+			}
+			}
+	} else {
+	// no posts found
+}
+$result .= '</ul>';
+
+return $result;
+
+/* Restore original Post Data */
+wp_reset_postdata();
+}
+// Add a shortcode
+add_shortcode('custom_post_category', 'Projectcharles_postsbycategory');
+
+// Enable shortcodes in text widgets
+add_filter('widget_text', 'do_shortcode');
 ?>
